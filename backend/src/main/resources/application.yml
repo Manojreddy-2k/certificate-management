@@ -1,0 +1,34 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: certificate-order-backend
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${KEYCLOAK_ISSUER:http://localhost:8081/realms/vital-records-dev}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+
+logging:
+  level:
+    gov.vitalrecords.certorder: INFO
+  pattern:
+    console: "%d{yyyy-MM-dd'T'HH:mm:ss.SSSXXX} %5p --- [%t] [%X{correlationId:-}] [%X{transactionId:-}] [%X{stripeEventId:-}] %logger{36} : %m%n%wEx"
+
+app:
+  session:
+    transaction-ttl-minutes: 30
+  payment:
+    # Stripe Checkout (test mode)
+    stripe-secret-key: ${STRIPE_SECRET_KEY:}
+    stripe-webhook-secret: ${STRIPE_WEBHOOK_SECRET:}
+    currency: ${PAYMENT_CURRENCY:usd}
+    success-url: ${PAYMENT_SUCCESS_URL:http://localhost:3000/payment-return}
+    cancel-url: ${PAYMENT_CANCEL_URL:http://localhost:3000/checkout}

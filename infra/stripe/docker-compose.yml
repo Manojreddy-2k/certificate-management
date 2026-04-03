@@ -1,0 +1,14 @@
+version: "3.9"
+
+services:
+  stripe-cli:
+    image: stripe/stripe-cli:latest
+    container_name: vital-stripe-cli
+    # For a backend running on your Windows host (IntelliJ), forward via host.docker.internal.
+    command: >
+      listen
+      --api-key ${STRIPE_SECRET_KEY}
+      --forward-to http://host.docker.internal:8080/api/payments/webhook
+    environment:
+      STRIPE_SECRET_KEY: ${STRIPE_SECRET_KEY}
+    restart: unless-stopped
