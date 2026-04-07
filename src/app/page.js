@@ -15,8 +15,8 @@ export default function HomePage() {
       </p>
       <div className="flex gap-3">
         {isAuthenticated ? (
-          <Link className="rounded bg-blue-600 px-4 py-2 text-white" href="/order">
-            Continue to Order Flow
+          <Link className="rounded bg-blue-600 px-4 py-2 text-white" href="/home">
+            Continue
           </Link>
         ) : (
           <Link className="rounded bg-blue-600 px-4 py-2 text-white" href="/login">

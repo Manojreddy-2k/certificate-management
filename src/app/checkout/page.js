@@ -26,9 +26,11 @@ function CheckoutContent() {
   const orderSummary = useMemo(() => {
     return {
       certificateType: order.certificateType,
-      amount: "39.00"
+      amount: "39.00",
+      applicant: order.applicant,
+      shipping: order.shipping
     };
-  }, [order.certificateType]);
+  }, [order.applicant, order.certificateType, order.shipping]);
 
   const startPayment = useCallback(async () => {
     if (!authSession?.accessToken) {

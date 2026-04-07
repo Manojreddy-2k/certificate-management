@@ -22,12 +22,12 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      router.push("/order");
+      router.push("/home");
     }
   }, [isAuthenticated, router]);
 
   const handleKeycloakLogin = async () => {
-    await signIn("keycloak", { callbackUrl: "/order" });
+    await signIn("keycloak", { callbackUrl: "/home" });
   };
 
   const handleLogout = async () => {
@@ -38,16 +38,20 @@ export default function LoginPage() {
   };
 
   return (
-    <section className="space-y-6 rounded-lg bg-white p-6 shadow-sm">
-      <h1 className="text-2xl font-semibold text-slate-900">Login</h1>
-      <p className="text-slate-700">
+    <section className="ui-card space-y-6 p-6">
+      <h1 className="text-type-2xl-bold">Login</h1>
+      <p className="text-type-md-regular" style={{ color: "hsl(var(--foreground) / 0.85)" }}>
         Sign in with Keycloak for local OIDC testing. This will be swapped with MI-Login later.
       </p>
-      {effectiveMessage ? <p className="rounded bg-amber-50 p-3 text-sm text-amber-800">{effectiveMessage}</p> : null}
+      {effectiveMessage ? (
+        <p className="rounded border p-3 text-type-sm-medium" style={{ borderColor: "hsl(var(--warning))", background: "hsl(var(--warning) / 0.15)" }}>
+          {effectiveMessage}
+        </p>
+      ) : null}
 
       {!isAuthenticated ? (
         <button
-          className="rounded bg-blue-600 px-4 py-2 text-white"
+          className="ui-btn ui-btn-primary touch-target-min"
           onClick={handleKeycloakLogin}
           type="button"
         >
@@ -55,12 +59,12 @@ export default function LoginPage() {
         </button>
       ) : (
         <div className="space-y-3">
-          <p className="text-slate-700">Signed in as {displayName}.</p>
+          <p className="text-type-md-regular">Signed in as {displayName}.</p>
           <div className="flex gap-3">
-            <button className="rounded bg-slate-800 px-4 py-2 text-white" onClick={() => router.push("/order")} type="button">
-              Go to Order
+            <button className="ui-btn ui-btn-primary touch-target-min" onClick={() => router.push("/home")} type="button">
+              Go to Home
             </button>
-            <button className="rounded border border-slate-300 px-4 py-2 text-slate-700" onClick={handleLogout} type="button">
+            <button className="ui-btn ui-btn-tertiary touch-target-min" onClick={handleLogout} type="button">
               Logout
             </button>
           </div>

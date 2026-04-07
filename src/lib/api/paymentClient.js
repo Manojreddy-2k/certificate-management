@@ -62,7 +62,9 @@ export async function createPaymentSession(orderPayload, accessToken) {
     headers: withAuthHeader({}, accessToken),
     body: JSON.stringify({
       certificateType: orderPayload?.certificateType,
-      amount: orderPayload?.amount
+      amount: orderPayload?.amount,
+      applicant: orderPayload?.applicant,
+      shipping: orderPayload?.shipping
     })
   });
 }

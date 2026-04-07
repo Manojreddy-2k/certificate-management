@@ -2,8 +2,10 @@ package gov.vitalrecords.certorder.api;
 
 import gov.vitalrecords.certorder.api.dto.CreatePaymentSessionRequest;
 import gov.vitalrecords.certorder.api.dto.CreatePaymentSessionResponse;
+import gov.vitalrecords.certorder.model.OrderDetails;
 import gov.vitalrecords.certorder.model.TransactionRecord;
 import gov.vitalrecords.certorder.observability.CorrelationIdConstants;
+import gov.vitalrecords.certorder.service.InMemoryOrderStore;
 import gov.vitalrecords.certorder.service.PaymentOrchestrationService;
 import gov.vitalrecords.certorder.service.StripePaymentService;
 import gov.vitalrecords.certorder.service.TransactionService;
@@ -31,15 +33,18 @@ public class PaymentController {
     private final TransactionService transactionService;
     private final StripePaymentService stripePaymentService;
     private final PaymentOrchestrationService paymentOrchestrationService;
+    private final InMemoryOrderStore orderStore;
 
     public PaymentController(
             TransactionService transactionService,
             StripePaymentService stripePaymentService,
-            PaymentOrchestrationService paymentOrchestrationService
+            PaymentOrchestrationService paymentOrchestrationService,
+            InMemoryOrderStore orderStore
     ) {
         this.transactionService = transactionService;
         this.stripePaymentService = stripePaymentService;
         this.paymentOrchestrationService = paymentOrchestrationService;
+        this.orderStore = orderStore;
     }
 
     @PostMapping("/session")
@@ -48,6 +53,7 @@ public class PaymentController {
         TransactionRecord record = transactionService.createTransaction(request.certificateType(), request.amount());
         MDC.put(CorrelationIdConstants.MDC_TRANSACTION_ID, record.getTransactionId());
         try {
+            orderStore.put(record.getTransactionId(), mapOrderDetails(request));
             var session = stripePaymentService.createCheckoutSession(record);
             transactionService.setRedirectUrl(record.getTransactionId(), session.getUrl());
             log.info("Payment session ready transactionId={} status={}", record.getTransactionId(), record.getStatus().name());
@@ -59,6 +65,26 @@ public class PaymentController {
         } finally {
             MDC.remove(CorrelationIdConstants.MDC_TRANSACTION_ID);
         }
+    }
+
+    private static OrderDetails mapOrderDetails(CreatePaymentSessionRequest request) {
+        return new OrderDetails(
+                request.certificateType(),
+                request.amount(),
+                new OrderDetails.Applicant(
+                        request.applicant().firstName(),
+                        request.applicant().lastName(),
+                        request.applicant().dateOfBirth(),
+                        request.applicant().email(),
+                        request.applicant().phone()
+                ),
+                new OrderDetails.Shipping(
+                        request.shipping().addressLine1(),
+                        request.shipping().city(),
+                        request.shipping().state(),
+                        request.shipping().zip()
+                )
+        );
     }
 
     @PostMapping("/webhook")
